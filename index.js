@@ -9,6 +9,9 @@ const cors = require('cors');
 
 const logic = require('./service/logic');
 
+//import jsonwebtoken
+const jwt = require('jsonwebtoken');
+
 
 //server creation
 const server = express();  
@@ -26,6 +29,22 @@ server.use(cors({origin: 'http://localhost:4200'}));
 server.listen(8000,() => {
     console.log("_server started at port 8000");
 });
+
+
+const tokenMiddleware = (req,res,next) => {
+    //to avoid run time errors we use try catch
+    try{
+        const token = req.headers["access_token"];
+        jwt.verify(token,"bankKey123");
+        next();
+    }catch{
+        res.status(404).json({
+            message: "token not verified",
+            status: false,
+            statusCode: 404
+        })
+    }
+}
 
 // //server api resolve
 // server.post('/getexample',(req, res) => {
@@ -50,7 +69,7 @@ server.post('/login',(req,res) =>{
 })
 
 //get user data -- get
-server.get('/getuser/:acno',(req,res) => {
+server.get('/getuser/:acno',tokenMiddleware,(req,res) => {
     logic.getUser(req.params.acno).then(result =>{
         res.status(result.statusCode).json(result)
     })
@@ -58,12 +77,30 @@ server.get('/getuser/:acno',(req,res) => {
 
 //balance -- get
 
-server.get('/userbalance/:acno',(req,res) => {
+server.get('/userbalance/:acno',tokenMiddleware,(req,res) => {
     logic.userBalance(req.params.acno).then(result => {
         res.status(result.statusCode).json(result);
     })
 })
 
 //money transfer -- post
+server.post('/transfer',tokenMiddleware,(request,response) => {
+    logic.moneyTransfer(
+        request.body.fromAcno,
+        request.body.toAcno,
+        request.body.amount,
+        request.body.passwd,
+        request.body.date
+    ).then(result => {
+        response.status(result.statusCode).json(result)
+    })
+})
+
 //account statement -- get
+server.get('/history/:acno',tokenMiddleware,(req,res) => {
+    logic.getTransaction(req.params.acno).then(result => {
+        res.status(result.statusCode).json(result);
+    })
+})
+
 //account delete -- delete
