@@ -163,9 +163,26 @@ getTransaction = (acno) => {
     })
 }
 
+deleteAcc = (acno) => {
+    return database.User.deleteOne({acno}).then(result => {
+        if(result){
+            return {
+                message:"bank account deleted successfully",
+                status:true,
+                statusCode: 200
+            }
+        }else{
+            return {
+                message:"account not present",
+                status:false,
+                statusCode: 404
+            }
+        }
+    })
+}
 
 
 //export
 module.exports= {
-    register, login ,getUser ,userBalance ,moneyTransfer ,getTransaction
+    register, login ,getUser ,userBalance ,moneyTransfer ,getTransaction ,deleteAcc
 };

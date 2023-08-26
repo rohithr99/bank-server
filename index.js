@@ -104,3 +104,8 @@ server.get('/history/:acno',tokenMiddleware,(req,res) => {
 })
 
 //account delete -- delete
+server.delete('/delete/:acno',tokenMiddleware,(request,response) => {
+    logic.deleteAcc(request.params.acno).then(result => {
+        response.status(result.statusCode).json(result);
+    })
+})
